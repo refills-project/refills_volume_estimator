@@ -4,7 +4,7 @@
 double counter::countObjects()
         {
             bool splane = false, wplane = false;
-            double *p, len, shelfLength = 440, cnt = 0;
+            double *p, len, shelfLength = 350, cnt = 0;
             std::vector<cv::Point3d> normals(3); //  normals[1] = shelf normal (y), normals[2] = wall's (z), normals[0] = their cross product (x). 
             cv::Mat trans, nnz, srcInBox;
             std::vector<EPV::DepthImageCoords> nnzCoords; // real world coordinates
@@ -29,9 +29,12 @@ double counter::countObjects()
 		
             // NX3 matrix (point cloud) with real world coordinates for the src pixels
             cv::Rect roi = { 0,0,_src.cols,_src.rows };
+            cv::Mat imgIn;
+	    	
             cv::Mat imgClone = _src(roi).clone();
+            imgClone.convertTo(imgIn,CV_32FC1);
             cv::imwrite("/home/realsense/depth_original.png",imgClone);
-            EPV::depthImageToWorldCoord_depth(imgClone, _intrinsics, nnzCoords, roi.tl());
+            EPV::depthImageToWorldCoord_depth(imgIn, _intrinsics, nnzCoords, roi.tl());
             nnz = cv::Mat::zeros(nnzCoords.size(), 3, CV_64FC1);
             double* nnzData = (double *)nnz.data;
             for (size_t i = 0; i < nnzCoords.size(); i++, nnzData+=3) {
@@ -39,7 +42,7 @@ double counter::countObjects()
                 nnzData[1] = nnzCoords[i].y;
                 nnzData[2] = nnzCoords[i].z;
 		
-		std::cerr<<nnzData[0]<< " "<<nnzData[1]<<" "<<nnzData[2]<<std::endl;
+//		std::cerr<<nnzData[0]<< " "<<nnzData[1]<<" "<<nnzData[2]<<std::endl;
             }
            
             
@@ -54,8 +57,7 @@ double counter::countObjects()
             {
                 p = trans.ptr<double>(i);
 	    //    std::cerr<<p[0]<<" "<<p[1]<<" "<<p[2]<<std::endl;
-                if (p[0] >= 0 && p[0] <= object._width && p[1] <= 0 && p[1] >= object._height && p[2] >= 0 && p[2] <= shelfLength){
-		std::cerr<<"Adding new point: "<<p<<std::endl;
+                if (p[0] >= 0 && p[0] <= object._width && p[1] <= 30 && p[1] >= object._height && p[2] >= 0 && p[2] <= shelfLength){
                     srcInBox.at<double>(nnzCoords[i].v, nnzCoords[i].u) = p[2];}
             }
             cv::Mat srcInBoxF;
