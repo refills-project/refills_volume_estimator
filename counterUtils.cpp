@@ -9,8 +9,7 @@ Copyright(c) 2014 Intel Corporation. All Rights Reserved.
 *******************************************************************************/
 #include "counterUtils.h"
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/features2d.hpp>
+
 #include <random>
 #include <fstream>
 #include <vector>
@@ -75,36 +74,36 @@ cv::Mat drawTwoEdgeMaps(const cv::Mat& redEdges, const cv::Mat& greenEdges)
     return disp;
 }
 //...................................................................................................
-cv::Mat drawEdgeCorrespondences(const cv::Mat& sSrc, const cv::Mat& sTarget, const cv::Mat& correspondences, bool displayIt)
-{
-    // draw
-    cv::Mat disp = drawTwoEdgeMaps(sSrc, sTarget);
-    cv::Mat disp0 = disp.clone();
-    for (int i = 0; i < correspondences.rows; i += 10)
-    {
-        for (int j = 0; j < correspondences.cols; ++j)
-        {
-            cv::Point p2 = (correspondences.type() == CV_32FC2) ?
-                           (cv::Point)correspondences.at<cv::Point2f>(i, j):
-                           correspondences.at<cv::Point>(i, j);
-            if (p2.x + p2.y > 0)
-            {
-                cv::Point p1 = cv::Point(j, i);
-                cv::Scalar color = counterUtils::randColor();
+//cv::Mat drawEdgeCorrespondences(const cv::Mat& sSrc, const cv::Mat& sTarget, const cv::Mat& correspondences, bool displayIt)
+//{
+//    // draw
+//    cv::Mat disp = drawTwoEdgeMaps(sSrc, sTarget);
+//    cv::Mat disp0 = disp.clone();
+//    for (int i = 0; i < correspondences.rows; i += 10)
+//    {
+//        for (int j = 0; j < correspondences.cols; ++j)
+//        {
+//            cv::Point p2 = (correspondences.type() == CV_32FC2) ?
+//                           (cv::Point)correspondences.at<cv::Point2f>(i, j):
+//                           correspondences.at<cv::Point>(i, j);
+//            if (p2.x + p2.y > 0)
+//            {
+//                cv::Point p1 = cv::Point(j, i);
+//                cv::Scalar color = counterUtils::randColor();
 
-                cv::line(disp, p1, p2, color);
-                cv::circle(disp, p1, 1, color);
-                cv::circle(disp, p2, 1, color);
-            }
-        }
-    }
-    if (displayIt)
-    {
-        counterUtils::dynamicImageComparison(disp0, disp, 1.0, 500);
-    }
-    return disp;
+//                cv::line(disp, p1, p2, color);
+//                cv::circle(disp, p1, 1, color);
+//                cv::circle(disp, p2, 1, color);
+//            }
+//        }
+//    }
+//    if (displayIt)
+//    {
+//        counterUtils::dynamicImageComparison(disp0, disp, 1.0, 500);
+//    }
+//    return disp;
 
-}
+//}
 //__________________________________________________________________________________________________
 // Alternately display two images. Both image sizes are set as the first's, times resizeFactor.
 void dynamicImageComparison(const cv::Mat& img1, const cv::Mat& img2, double resizeFactor, int blinkTime)
@@ -141,61 +140,61 @@ void outlinedText(cv::Mat& img, const std::string& text, cv::Point org,
 }
 
 //__________________________________________________________________________________________________
-cv::Mat getColorCodedDepth(const cv::Mat& depth, int minz, int maxz)
-{
-	cv::Mat depth_disp;
-	depth.convertTo(depth_disp, CV_32FC1);
-	depth_disp.setTo(minz, depth_disp < minz);
-	depth_disp.setTo(maxz, depth_disp > maxz);
-	float depth_scale_factor = 1.0f / (maxz - minz);
+//cv::Mat getColorCodedDepth(const cv::Mat& depth, int minz, int maxz)
+//{
+//	cv::Mat depth_disp;
+//	depth.convertTo(depth_disp, CV_32FC1);
+//	depth_disp.setTo(minz, depth_disp < minz);
+//	depth_disp.setTo(maxz, depth_disp > maxz);
+//	float depth_scale_factor = 1.0f / (maxz - minz);
 
-	depth_disp -= minz;
-	depth_disp *= depth_scale_factor;
-	cv::log(1 + depth_disp, depth_disp);
+//	depth_disp -= minz;
+//	depth_disp *= depth_scale_factor;
+//	cv::log(1 + depth_disp, depth_disp);
 
-	depth_disp *= (255 / cv::log(2));
-	depth_disp.convertTo(depth_disp, CV_8UC1);
+//	depth_disp *= (255 / cv::log(2));
+//	depth_disp.convertTo(depth_disp, CV_8UC1);
 
-	cv::Mat cmap;
-	cv::applyColorMap(depth_disp, cmap, cv::COLORMAP_JET);
-#if 1
-	cmap.setTo(cv::Scalar(255, 255, 255), depth < minz);
-	cmap.setTo(cv::Scalar(100, 100, 100), depth == 0);
-	cmap.setTo(cv::Scalar(0, 0, 0), depth >= maxz);
-#endif
-	return cmap;
+//	cv::Mat cmap;
+//	cv::applyColorMap(depth_disp, cmap, cv::COLORMAP_JET);
+//#if 1
+//	cmap.setTo(cv::Scalar(255, 255, 255), depth < minz);
+//	cmap.setTo(cv::Scalar(100, 100, 100), depth == 0);
+//	cmap.setTo(cv::Scalar(0, 0, 0), depth >= maxz);
+//#endif
+//	return cmap;
 
-}
+//}
 
 //__________________________________________________________________________________________________
-cv::Mat displayColorCodedDepth(const std::string& winName, const cv::Mat& depth)
-{
-	static int minz = 200, maxz = 4000; // static for being consistent between all windows
-	cv::Mat depthCpy;
-	if (depth.type() != CV_16UC1)
-	{
-		depth.convertTo(depthCpy, CV_16UC1);
-	}
-	else
-	{
-		depthCpy = depth;
-	}
-	cv::Mat cmap = getColorCodedDepth(depthCpy, minz, maxz);
+//cv::Mat displayColorCodedDepth(const std::string& winName, const cv::Mat& depth)
+//{
+//	static int minz = 200, maxz = 4000; // static for being consistent between all windows
+//	cv::Mat depthCpy;
+//	if (depth.type() != CV_16UC1)
+//	{
+//		depth.convertTo(depthCpy, CV_16UC1);
+//	}
+//	else
+//	{
+//		depthCpy = depth;
+//	}
+//	cv::Mat cmap = getColorCodedDepth(depthCpy, minz, maxz);
 
-	cv::imshow(winName, cmap);
-	cv::createTrackbar("minz", winName, &minz, 1500);
-	cv::createTrackbar("maxz", winName, &maxz, 5000);
-	if (maxz<minz)
-	{
-		minz = maxz - 50;
-		if (minz < 0)
-		{
-			minz = 0;
-			maxz = 50;
-		}
-	}
-	return cmap;
-}
+//	cv::imshow(winName, cmap);
+//	cv::createTrackbar("minz", winName, &minz, 1500);
+//	cv::createTrackbar("maxz", winName, &maxz, 5000);
+//	if (maxz<minz)
+//	{
+//		minz = maxz - 50;
+//		if (minz < 0)
+//		{
+//			minz = 0;
+//			maxz = 50;
+//		}
+//	}
+//	return cmap;
+//}
 
 }
 
@@ -755,7 +754,7 @@ namespace TransformUtils
 		R = svd.vt.t() * svd.u.t();
 		// special reflection case
 		double det_R = cv::determinant(R);
-		if (cv::abs(det_R + 1.0) < 0.0001)
+		if (std::fabs(det_R + 1.0) < 0.0001)
 		{
 			svd.vt.row(2) *= -1.f;
 			R = svd.vt.t() * svd.u.t();
