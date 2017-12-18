@@ -19,10 +19,18 @@ double counter::countObjects()
             
             // 3X1 matrix for translating the coordinate system so the separator is in (0,0,0)
             cv::Mat translation(_separator);
+	    double tempy= _separator.y; double tempx = _separator.x;
+	    cv::Point offset(0,0);
+	    int u = (_separator.x*_intrinsics.fx)/_separator.z+_intrinsics.px-offset.x;
+	    int v = (_separator.y*_intrinsics.fy)/_separator.z+_intrinsics.py-offset.y;
+            
+            std::cerr<<"row: "<<u<<" col: "<<v<<std::endl;
 
+		
             // NX3 matrix (point cloud) with real world coordinates for the src pixels
             cv::Rect roi = { 0,0,_src.cols,_src.rows };
             cv::Mat imgClone = _src(roi).clone();
+            cv::imwrite("/home/realsense/depth_original.png",imgClone);
             EPV::depthImageToWorldCoord_depth(imgClone, _intrinsics, nnzCoords, roi.tl());
             nnz = cv::Mat::zeros(nnzCoords.size(), 3, CV_64FC1);
             double* nnzData = (double *)nnz.data;
@@ -30,22 +38,30 @@ double counter::countObjects()
                 nnzData[0] = nnzCoords[i].x;
                 nnzData[1] = nnzCoords[i].y;
                 nnzData[2] = nnzCoords[i].z;
+		
+		std::cerr<<nnzData[0]<< " "<<nnzData[1]<<" "<<nnzData[2]<<std::endl;
             }
+           
             
             // real world coordinates after rotation and translation
-            trans = TransformUtils::doInverseTransform(nnz, _rotation, translation); 
-            
+            trans = TransformUtils::doInverseTransform(nnz, _rotation, translation);
             // is in box
+	    std::cerr<<"!!!!"<<trans.at<double>(v,u)<<"!!!!"<<std::endl;
+	    cv::imwrite("/home/realsense/depth_trans.png",trans);
             srcInBox = cv::Mat::zeros(_src.rows, _src.cols, CV_64FC1);
             objectType object = getObject();
             for (size_t i = 0; i < trans.rows; i++)
             {
                 p = trans.ptr<double>(i);
-                if (p[0] >= 0 && p[0] <= object._width && p[1] <= 0 && p[1] >= object._height && p[2] >= 0 && p[2] <= shelfLength)
-                    srcInBox.at<double>(nnzCoords[i].v, nnzCoords[i].u) = p[2];
+	    //    std::cerr<<p[0]<<" "<<p[1]<<" "<<p[2]<<std::endl;
+                if (p[0] >= 0 && p[0] <= object._width && p[1] <= 0 && p[1] >= object._height && p[2] >= 0 && p[2] <= shelfLength){
+		std::cerr<<"Adding new point: "<<p<<std::endl;
+                    srcInBox.at<double>(nnzCoords[i].v, nnzCoords[i].u) = p[2];}
             }
             cv::Mat srcInBoxF;
             srcInBox.convertTo(srcInBoxF, CV_32FC1);
+	    std::cerr<<"THIS SHPOULD BE ZERO: "<<srcInBox.at<double>(v,u)<<std::endl; 
+            cv::imwrite("/home/realsense/depth_result.png", srcInBox);
             float range[] = { 1, 1025 };
             double per95 = EPV::computePercentilePoint(srcInBoxF, 0.999, range);
             double per5 = EPV::computePercentilePoint(srcInBoxF, 0.05, range);
