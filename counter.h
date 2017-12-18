@@ -1,9 +1,16 @@
 #pragma once
 
+#include <opencv2/core/version.hpp>
+#if CV_MAJOR_VERSION == 2
+  #include <opencv2/imgproc/imgproc.hpp>
+  #include <opencv2/highgui/highgui.hpp>
+#elif
+  #include "opencv2/imgproc.hpp"  
+  #include "opencv2/imgcodecs.hpp"  
+  #include "opencv2/highgui.hpp" 
+#endif
 
-#include "opencv2/imgproc.hpp"  
-#include "opencv2/imgcodecs.hpp"  
-#include "opencv2/highgui.hpp" 
+#include <counterUtils.h>
 #include <iostream> 
 #include <stdio.h>
 #include <math.h>
