@@ -1,19 +1,14 @@
 #pragma once
 
-#include <opencv2/core/version.hpp>
-#if CV_MAJOR_VERSION == 2
-  #include <opencv2/imgproc/imgproc.hpp>
-  #include <opencv2/highgui/highgui.hpp>
-#elif CV_MAJOR_VERSIOn == 3
-  #include "opencv2/imgproc.hpp"  
-  #include "opencv2/imgcodecs.hpp"  
-  #include "opencv2/highgui.hpp" 
-#endif
 
-#include <counterUtils.h>
+#include "opencv2/imgproc.hpp"  
+#include "opencv2/imgcodecs.hpp"  
+#include "opencv2/highgui.hpp" 
 #include <iostream> 
 #include <stdio.h>
 #include <math.h>
+
+#include <librealsense2/rs.hpp>//TODO: delete!!!!!!!!!!!!
 
 #define ROUND(x) (static_cast<int>(x + 0.5))
 
@@ -38,7 +33,6 @@ class counter
         cv::Point3d _separator; // the point where we start to segment the specific line of products
         objectType _object; // the type of the object being counted
         cv::Mat _rotation = cv::Mat::zeros(3, 3, CV_64FC1);
-        EPV::CameraIntrinsics _intrinsics; // [fx,fy,x0,y0,cols,rows]
 
     public:
         counter(): _object(0,0,0,""){}
@@ -65,16 +59,6 @@ class counter
         void setRotation(cv::Mat& rotation)
         {
             _rotation = rotation;
-        }
-
-        void setIntrinsics(double fx, double fy, double px, double py, uint32_t width, uint32_t height)
-        {
-            _intrinsics.fx = fx;
-            _intrinsics.fy = fy;
-            _intrinsics.px = px;
-            _intrinsics.py = py;
-            _intrinsics.w = width;
-            _intrinsics.h = height;
         }
 
         objectType& getObject()
