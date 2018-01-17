@@ -9,6 +9,7 @@
   #include "opencv2/imgcodecs.hpp"  
   #include "opencv2/highgui.hpp" 
 #endif
+#include <librealsense2/rs.hpp>
 
 #include <counterUtils.h>
 #include <iostream> 
@@ -82,5 +83,5 @@ class counter
             return _object;
         }
 
-        double countObjects();
+        double countObjects(bool pf = false);
 };
